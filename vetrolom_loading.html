@@ -2,185 +2,322 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>ТюрьмаRP — загрузка</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Волчий Яр — загрузка</title>
 <style>
+    :root {
+        --void:       #0b0906;
+        --ground:     #14100c;
+        --panel:      #1c1611;
+        --line:       #3a2c1e;
+        --amber:      #c17d34;
+        --amber-dim:  #7a4f22;
+        --amber-glow: rgba(193, 125, 52, 0.28);
+        --ink:        #ece4d6;
+        --ink-dim:    #9c9284;
+        --ink-faint:  #6b6255;
+    }
+
+    * { box-sizing: border-box; }
+
     html, body {
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
+        background: var(--void);
+        color: var(--ink);
         overflow: hidden;
-        background: #0a0908;
-        font-family: "Tahoma", "Segoe UI", sans-serif;
-        color: #e6e1d7;
+        font-family: "PT Sans", "Segoe UI", sans-serif;
     }
 
-    /* Тёмный фон с лёгкой виньеткой и едва заметной решёткой (тюремные
-       прутья/окно) — всё чистым CSS, без внешних картинок, чтобы страница
-       не зависела от загрузки лишних файлов и точно не была пустой, если
-       что-то не подгрузится. */
-    #bg {
-        position: fixed;
-        inset: 0;
-        background:
-            radial-gradient(ellipse at center, rgba(40, 32, 22, 0.55) 0%, rgba(6, 5, 4, 0.95) 70%),
-            linear-gradient(#0a0908, #0a0908);
-        z-index: 0;
+    @media (prefers-reduced-motion: reduce) {
+        * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
     }
 
-    #bars {
+    /* ---------- фон: колючая изгородь + прожектор вышки ---------- */
+
+    #scene {
         position: fixed;
-        inset: 0;
-        z-index: 1;
-        opacity: 0.16;
-        background-image: repeating-linear-gradient(
-            90deg,
-            #000 0px,
-            #000 2px,
-            transparent 2px,
-            transparent 90px
-        );
-        pointer-events: none;
+        top: 0; right: 0; bottom: 0; left: 0;
+        background: var(--void);
+    }
+
+    #fence {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 46px;
+        opacity: 0.55;
+        background-image:
+            repeating-linear-gradient(45deg,  transparent 0 9px, var(--line) 9px 10px, transparent 10px 19px),
+            repeating-linear-gradient(-45deg, transparent 0 9px, var(--line) 9px 10px, transparent 10px 19px);
+        background-color: var(--ground);
+        border-bottom: 1px solid var(--line);
+    }
+
+    #spotlight {
+        position: absolute;
+        top: -30%;
+        left: 62%;
+        width: 90vw;
+        height: 90vw;
+        transform: translateX(-50%);
+        background: radial-gradient(ellipse at center, var(--amber-glow) 0%, rgba(193,125,52,0.06) 32%, transparent 62%);
+        animation: drift 14s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+        from { left: 58%; }
+        to   { left: 68%; }
     }
 
     #vignette {
-        position: fixed;
-        inset: 0;
-        z-index: 2;
-        pointer-events: none;
-        box-shadow: inset 0 0 220px 60px rgba(0, 0, 0, 0.85);
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        box-shadow: inset 0 0 18vw 4vw rgba(0,0,0,0.8);
     }
 
-    #content {
+    #groundline {
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        height: 38%;
+        background: linear-gradient(to top, rgba(0,0,0,0.65), transparent);
+    }
+
+    /* ---------- досье / карточка ---------- */
+
+    #stage {
         position: fixed;
-        inset: 0;
-        z-index: 3;
+        top: 0; right: 0; bottom: 0; left: 0;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        text-align: center;
-        padding: 0 24px;
+        padding: 5vh 5vw;
     }
 
-    #title {
-        font-size: 46px;
-        font-weight: 900;
-        letter-spacing: 6px;
-        color: #be7828;
-        text-shadow: 0 0 24px rgba(190, 120, 40, 0.35);
-        margin: 0;
+    #dossier {
+        width: min(560px, 92vw);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+        padding: 34px 38px 28px;
+        position: relative;
+        animation: settle 0.7s cubic-bezier(.2,.8,.2,1) both;
+        transform-origin: top left;
     }
 
-    #subtitle {
-        margin-top: 10px;
-        font-size: 16px;
-        letter-spacing: 2px;
-        color: #a5a096;
+    @keyframes settle {
+        from { opacity: 0; transform: rotate(-1.4deg) translateY(10px) scale(0.98); }
+        to   { opacity: 1; transform: rotate(-0.4deg) translateY(0) scale(1); }
+    }
+
+    #dossier::before {
+        content: "";
+        position: absolute;
+        top: 6px; right: 6px; bottom: 6px; left: 6px;
+        border: 1px solid rgba(193,125,52,0.22);
+        pointer-events: none;
+    }
+
+    #case-no {
+        font-family: "PT Mono", monospace;
+        font-size: 12px;
+        letter-spacing: 1.5px;
+        color: var(--ink-faint);
         text-transform: uppercase;
     }
 
-    #serverline {
-        margin-top: 26px;
-        font-size: 15px;
-        font-weight: 700;
-        color: #e6e1d7;
-        min-height: 20px;
-    }
-
-    #maplime {
-        margin-top: 4px;
-        font-size: 13px;
-        color: #a5a096;
-        min-height: 18px;
-    }
-
-    #barwrap {
-        margin-top: 34px;
-        width: 460px;
-        max-width: 80vw;
-        height: 10px;
-        border-radius: 5px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(190, 120, 40, 0.45);
-        overflow: hidden;
-        position: relative;
-    }
-
-    #barfill {
+    #stamp {
         position: absolute;
-        top: 0;
-        left: -40%;
-        width: 40%;
-        height: 100%;
-        border-radius: 5px;
-        background: linear-gradient(90deg, rgba(190,120,40,0) 0%, #be7828 50%, rgba(190,120,40,0) 100%);
-        animation: sweep 1.6s ease-in-out infinite;
-    }
-
-    @keyframes sweep {
-        0%   { left: -40%; }
-        100% { left: 100%; }
-    }
-
-    #status {
-        margin-top: 14px;
-        font-size: 13px;
-        color: #cbb896;
-        letter-spacing: 1px;
-        min-height: 18px;
-    }
-
-    #tip {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 34px;
-        z-index: 3;
+        top: 26px;
+        right: 30px;
+        width: 74px;
+        height: 74px;
+        border: 2px solid var(--amber-dim);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        padding: 0 40px;
-        font-size: 13px;
-        color: #8f8a80;
-        transition: opacity 0.6s ease;
+        transform: rotate(11deg);
+        opacity: 0.75;
     }
 
-    #tip b {
-        color: #cbb896;
+    #stamp span {
+        font-family: "PT Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 1px;
+        color: var(--amber-dim);
+        line-height: 1.3;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        margin: 14px 0 2px;
+        font-family: "Russo One", "PT Sans", sans-serif;
+        font-weight: 400;
+        font-size: clamp(34px, 6vw, 52px);
+        letter-spacing: 3px;
+        color: var(--amber);
+        text-wrap: balance;
+        text-shadow: 0 0 30px rgba(193,125,52,0.25);
+    }
+
+    #subtitle {
+        font-family: "PT Mono", monospace;
+        font-size: 12.5px;
+        letter-spacing: 0.5px;
+        color: var(--ink-dim);
+        margin: 0 0 22px;
+        max-width: 46ch;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px dashed var(--line);
+        margin: 0 0 18px;
+    }
+
+    .field-row {
+        display: flex;
+        gap: 8px;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 6px;
+    }
+
+    .field-row .k {
+        color: var(--ink-faint);
+        flex: 0 0 auto;
+    }
+
+    .field-row .v {
+        color: var(--ink);
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #progress-wrap {
+        margin-top: 22px;
+    }
+
+    #ledger {
+        display: flex;
+        gap: 3px;
+        height: 16px;
+        align-items: flex-end;
+    }
+
+    .tick {
+        flex: 1;
+        height: 40%;
+        background: var(--line);
+        border-radius: 1px;
+        animation: fill-tick 1.8s ease-in-out infinite;
+    }
+
+    @keyframes fill-tick {
+        0%, 100% { height: 30%; background: var(--line); }
+        50%      { height: 100%; background: var(--amber); }
+    }
+
+    #status-line {
+        margin-top: 10px;
+        font-family: "PT Mono", monospace;
+        font-size: 12.5px;
+        color: var(--ink-dim);
+        letter-spacing: 0.5px;
+        min-height: 16px;
+    }
+
+    #status-line::before {
+        content: "» ";
+        color: var(--amber-dim);
+    }
+
+    #tip-wrap {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--ink-faint);
+        line-height: 1.5;
+    }
+
+    #tip-wrap b {
+        display: block;
+        color: var(--ink-dim);
+        font-weight: 700;
+        margin-top: 2px;
+        transition: opacity 0.5s ease;
     }
 
     #corner {
         position: fixed;
-        left: 22px;
-        bottom: 18px;
-        z-index: 3;
-        font-size: 11px;
-        letter-spacing: 1px;
-        color: #55504a;
+        left: 26px;
+        bottom: 20px;
+        font-family: "PT Mono", monospace;
+        font-size: 10.5px;
+        letter-spacing: 1.5px;
+        color: var(--ink-faint);
         text-transform: uppercase;
+        opacity: 0.7;
     }
 </style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Sans:wght@400;700&family=PT+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div id="bg"></div>
-<div id="bars"></div>
-<div id="vignette"></div>
-
-<div id="content">
-    <div id="title">ТЮРЬМАRP</div>
-    <div id="subtitle">«Волчий Яр» — исправительная колония строгого режима</div>
-
-    <div id="serverline">Подключение к серверу...</div>
-    <div id="maplime">&nbsp;</div>
-
-    <div id="barwrap"><div id="barfill"></div></div>
-    <div id="status">Установка соединения...</div>
+<div id="scene">
+    <div id="spotlight"></div>
+    <div id="groundline"></div>
+    <div id="vignette"></div>
+    <div id="fence"></div>
 </div>
 
-<div id="tip">Совет: <b id="tiptext">наведитесь на другого игрока и нажмите E — вы для него «Незнакомец», пока не познакомитесь.</b></div>
+<div id="stage">
+    <div id="dossier">
+        <div id="stamp"><span>ТЮРЬМАRP<br>ДОСЬЕ</span></div>
+
+        <div id="case-no">Личное дело № ВЯ-<span id="case-num">0000</span></div>
+
+        <h1>ТЮРЬМАRP</h1>
+        <div id="subtitle">«Волчий Яр» — исправительная колония строгого режима</div>
+
+        <hr>
+
+        <div class="field-row"><span class="k">Учреждение:</span><span class="v" id="f-server">ТюрьмаRP</span></div>
+        <div class="field-row"><span class="k">Объект:</span><span class="v" id="f-map">—</span></div>
+
+        <div id="progress-wrap">
+            <div id="ledger"></div>
+            <div id="status-line">Установка соединения...</div>
+        </div>
+
+        <div id="tip-wrap">
+            Совет:
+            <b id="tiptext">наведитесь на другого игрока и нажмите E — вы для него «Незнакомец», пока не познакомитесь.</b>
+        </div>
+    </div>
+</div>
+
 <div id="corner">vetrolom_darkrp</div>
 
 <script>
+    document.getElementById("case-num").textContent = String(1000 + Math.floor(Math.random() * 8999));
+
+    var ledger = document.getElementById("ledger");
+    for (var i = 0; i < 22; i++) {
+        var t = document.createElement("div");
+        t.className = "tick";
+        t.style.animationDelay = (i * 0.07) + "s";
+        ledger.appendChild(t);
+    }
+
     var TIPS = [
         "наведитесь на другого игрока и нажмите E — вы для него «Незнакомец», пока не познакомитесь.",
         "у каждого аккаунта несколько слотов персонажей — заключённый или охрана, путь закрепляется навсегда.",
@@ -198,49 +335,47 @@
         el.style.opacity = 0;
         setTimeout(function() {
             tipIndex = (tipIndex + 1) % TIPS.length;
-            el.innerHTML = TIPS[tipIndex];
+            el.textContent = TIPS[tipIndex];
             el.style.opacity = 1;
         }, 400);
     }
-    setInterval(RotateTip, 5000);
+    setInterval(RotateTip, 5200);
 
     /*
-        Функции ниже вызывает САМ движок GMod во время подключения (см.
-        официальную механику "Creating a Custom Loading Screen") — если
-        какая-то из них не будет вызвана (например, старая версия игры),
-        страница всё равно выглядит нормально благодаря дефолтным текстам,
-        заданным прямо в разметке выше.
+        Функции ниже вызывает сам движок GMod во время подключения клиента
+        (см. официальную механику "Creating a Custom Loading Screen") — если
+        какая-то из них не будет вызвана, страница всё равно выглядит
+        нормально благодаря дефолтным текстам, заданным прямо в разметке.
     */
     function GameDetails(serverName, serverURL, mapName, maxPlayers, steamID, gameMode) {
-        var s = document.getElementById("serverline");
-        var m = document.getElementById("maplime");
-        if (s) s.innerHTML = serverName || "ТюрьмаRP";
-        if (m) m.innerHTML = "Карта: " + (mapName || "?");
+        var s = document.getElementById("f-server");
+        var m = document.getElementById("f-map");
+        if (s) s.textContent = serverName || "ТюрьмаRP";
+        if (m) m.textContent = mapName || "—";
     }
 
     function SetStatusChanged(status) {
-        var el = document.getElementById("status");
+        var el = document.getElementById("status-line");
         if (!el) return;
 
         var known = {
-            "Connecting":               "Подключение к серверу...",
-            "Client sending 'connect'": "Отправка запроса на подключение...",
-            "Client received 'challenge'": "Согласование с сервером...",
-            "Requesting map":           "Запрос данных карты...",
-            "Requesting client info":   "Запрос информации о клиенте...",
-            "Received signon buffers":  "Приём начальных данных...",
-            "Sending Client Info":      "Отправка информации о клиенте...",
-            "Signon":                   "Синхронизация с сервером...",
-            "Spawn":                    "Спавн в мире...",
-            "Active":                   "Почти готово..."
+            "Connecting":                   "Подключение к серверу...",
+            "Client sending 'connect'":     "Отправка запроса на подключение...",
+            "Client received 'challenge'":  "Согласование с сервером...",
+            "Requesting map":               "Запрос данных карты...",
+            "Requesting client info":       "Запрос информации о клиенте...",
+            "Received signon buffers":      "Приём начальных данных...",
+            "Sending Client Info":          "Отправка информации о клиенте...",
+            "Signon":                       "Синхронизация с сервером...",
+            "Spawn":                        "Спавн в мире...",
+            "Active":                       "Почти готово..."
         };
 
-        el.innerHTML = known[status] || status || "Загрузка...";
+        el.textContent = known[status] || status || "Загрузка...";
     }
 
     function SetFilter(str) {
-        /* Устаревший колбэк движка — оставлен пустым намеренно, страница
-           не использует список серверных модов/фильтр. */
+        /* Устаревший колбэк движка — оставлен пустым намеренно. */
     }
 </script>
 
