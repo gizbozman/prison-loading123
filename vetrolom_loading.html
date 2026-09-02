@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>ТюрьмаRP — загрузка</title>
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0a0908;
+        font-family: "Tahoma", "Segoe UI", sans-serif;
+        color: #e6e1d7;
+    }
+
+    /* Тёмный фон с лёгкой виньеткой и едва заметной решёткой (тюремные
+       прутья/окно) — всё чистым CSS, без внешних картинок, чтобы страница
+       не зависела от загрузки лишних файлов и точно не была пустой, если
+       что-то не подгрузится. */
+    #bg {
+        position: fixed;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at center, rgba(40, 32, 22, 0.55) 0%, rgba(6, 5, 4, 0.95) 70%),
+            linear-gradient(#0a0908, #0a0908);
+        z-index: 0;
+    }
+
+    #bars {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        opacity: 0.16;
+        background-image: repeating-linear-gradient(
+            90deg,
+            #000 0px,
+            #000 2px,
+            transparent 2px,
+            transparent 90px
+        );
+        pointer-events: none;
+    }
+
+    #vignette {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        box-shadow: inset 0 0 220px 60px rgba(0, 0, 0, 0.85);
+    }
+
+    #content {
+        position: fixed;
+        inset: 0;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 24px;
+    }
+
+    #title {
+        font-size: 46px;
+        font-weight: 900;
+        letter-spacing: 6px;
+        color: #be7828;
+        text-shadow: 0 0 24px rgba(190, 120, 40, 0.35);
+        margin: 0;
+    }
+
+    #subtitle {
+        margin-top: 10px;
+        font-size: 16px;
+        letter-spacing: 2px;
+        color: #a5a096;
+        text-transform: uppercase;
+    }
+
+    #serverline {
+        margin-top: 26px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #e6e1d7;
+        min-height: 20px;
+    }
+
+    #maplime {
+        margin-top: 4px;
+        font-size: 13px;
+        color: #a5a096;
+        min-height: 18px;
+    }
+
+    #barwrap {
+        margin-top: 34px;
+        width: 460px;
+        max-width: 80vw;
+        height: 10px;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(190, 120, 40, 0.45);
+        overflow: hidden;
+        position: relative;
+    }
+
+    #barfill {
+        position: absolute;
+        top: 0;
+        left: -40%;
+        width: 40%;
+        height: 100%;
+        border-radius: 5px;
+        background: linear-gradient(90deg, rgba(190,120,40,0) 0%, #be7828 50%, rgba(190,120,40,0) 100%);
+        animation: sweep 1.6s ease-in-out infinite;
+    }
+
+    @keyframes sweep {
+        0%   { left: -40%; }
+        100% { left: 100%; }
+    }
+
+    #status {
+        margin-top: 14px;
+        font-size: 13px;
+        color: #cbb896;
+        letter-spacing: 1px;
+        min-height: 18px;
+    }
+
+    #tip {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 34px;
+        z-index: 3;
+        text-align: center;
+        padding: 0 40px;
+        font-size: 13px;
+        color: #8f8a80;
+        transition: opacity 0.6s ease;
+    }
+
+    #tip b {
+        color: #cbb896;
+    }
+
+    #corner {
+        position: fixed;
+        left: 22px;
+        bottom: 18px;
+        z-index: 3;
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: #55504a;
+        text-transform: uppercase;
+    }
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<div id="bars"></div>
+<div id="vignette"></div>
+
+<div id="content">
+    <div id="title">ТЮРЬМАRP</div>
+    <div id="subtitle">«Волчий Яр» — исправительная колония строгого режима</div>
+
+    <div id="serverline">Подключение к серверу...</div>
+    <div id="maplime">&nbsp;</div>
+
+    <div id="barwrap"><div id="barfill"></div></div>
+    <div id="status">Установка соединения...</div>
+</div>
+
+<div id="tip">Совет: <b id="tiptext">наведитесь на другого игрока и нажмите E — вы для него «Незнакомец», пока не познакомитесь.</b></div>
+<div id="corner">vetrolom_darkrp</div>
+
+<script>
+    var TIPS = [
+        "наведитесь на другого игрока и нажмите E — вы для него «Незнакомец», пока не познакомитесь.",
+        "у каждого аккаунта несколько слотов персонажей — заключённый или охрана, путь закрепляется навсегда.",
+        "статья, выбранная при создании персонажа, даёт свой пассивный эффект — выбирайте осознанно.",
+        "хотбар на клавиши 1-4 — быстрый доступ к вещам без похода в инвентарь.",
+        "дело/профиль/татуировки теперь во вкладке «ТюрьмаРП» F4-меню.",
+        "чем дольше отбывается срок, тем выше тюремный ранг — привилегии растут вместе с ним.",
+        "у каждого персонажа есть описание — его увидят только те, с кем вы познакомились."
+    ];
+
+    var tipIndex = 0;
+    function RotateTip() {
+        var el = document.getElementById("tiptext");
+        if (!el) return;
+        el.style.opacity = 0;
+        setTimeout(function() {
+            tipIndex = (tipIndex + 1) % TIPS.length;
+            el.innerHTML = TIPS[tipIndex];
+            el.style.opacity = 1;
+        }, 400);
+    }
+    setInterval(RotateTip, 5000);
+
+    /*
+        Функции ниже вызывает САМ движок GMod во время подключения (см.
+        официальную механику "Creating a Custom Loading Screen") — если
+        какая-то из них не будет вызвана (например, старая версия игры),
+        страница всё равно выглядит нормально благодаря дефолтным текстам,
+        заданным прямо в разметке выше.
+    */
+    function GameDetails(serverName, serverURL, mapName, maxPlayers, steamID, gameMode) {
+        var s = document.getElementById("serverline");
+        var m = document.getElementById("maplime");
+        if (s) s.innerHTML = serverName || "ТюрьмаRP";
+        if (m) m.innerHTML = "Карта: " + (mapName || "?");
+    }
+
+    function SetStatusChanged(status) {
+        var el = document.getElementById("status");
+        if (!el) return;
+
+        var known = {
+            "Connecting":               "Подключение к серверу...",
+            "Client sending 'connect'": "Отправка запроса на подключение...",
+            "Client received 'challenge'": "Согласование с сервером...",
+            "Requesting map":           "Запрос данных карты...",
+            "Requesting client info":   "Запрос информации о клиенте...",
+            "Received signon buffers":  "Приём начальных данных...",
+            "Sending Client Info":      "Отправка информации о клиенте...",
+            "Signon":                   "Синхронизация с сервером...",
+            "Spawn":                    "Спавн в мире...",
+            "Active":                   "Почти готово..."
+        };
+
+        el.innerHTML = known[status] || status || "Загрузка...";
+    }
+
+    function SetFilter(str) {
+        /* Устаревший колбэк движка — оставлен пустым намеренно, страница
+           не использует список серверных модов/фильтр. */
+    }
+</script>
+
+</body>
+</html>
